@@ -73,7 +73,7 @@ pip install -r requirements.txt
 python data/generate_data.py
 streamlit run app.py
 
-Project Structure
+## Project Structure
 
 cardioguard/
 ├── app.py
@@ -82,7 +82,7 @@ cardioguard/
 ├── models/
 └── README.md
 
-Tech Stack
+## Tech Stack
 Python
 XGBoost
 SHAP
@@ -91,26 +91,26 @@ FAISS
 Mistral LLM
 Streamlit
 
-Contributions
+## Contributions
 Oumnia Chiouikh
-Design and implementation of the multi-agent architecture (LangChain orchestrator)
-Development of the XGBoost predictive model
-Integration of SHAP explainability and patient clustering
-Implementation of the Streamlit dashboard
-System integration and end-to-end pipeline
+  Design and implementation of the multi-agent architecture (LangChain orchestrator)
+  Development of the XGBoost predictive model
+  Integration of SHAP explainability and patient clustering
+  Implementation of the Streamlit dashboard
+  System integration and end-to-end pipeline
 Cynthia Ayetolou
-Development of the RAG pipeline (FAISS + embeddings)
-Integration of the Mistral LLM for medical question answering
-Implementation of personalised lifestyle recommendation generation
-Construction and structuring of the medical knowledge base
-Contribution to testing and system validation
+  Development of the RAG pipeline (FAISS + embeddings)
+  Integration of the Mistral LLM for medical question answering
+  Implementation of personalised lifestyle recommendation generation
+  Construction and structuring of the medical knowledge base
+  Contribution to testing and system validation
 
-Disclaimer
+## Disclaimer
 
 This project is intended for educational and research purposes only.
 It is not a medical diagnosis tool.
 
-Authors
+## Authors
 
 Oumnia Chiouikh
 Cynthia Ayetolou

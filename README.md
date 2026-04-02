@@ -102,6 +102,7 @@ Oumnia Chiouikh
 - Integration of SHAP explainability and patient clustering
 - Implementation of the Streamlit dashboard
 - System integration and end-to-end pipeline
+
 Cynthia Ayetolou
 - Development of the RAG pipeline (FAISS + embeddings)
 - Integration of the Mistral LLM for medical question answering

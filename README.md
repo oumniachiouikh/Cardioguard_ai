@@ -88,27 +88,27 @@ cardioguard/
     └── faiss_cardio/
 
 ## Tech Stack
-Python
-XGBoost
-SHAP
-LangChain
-FAISS
-Mistral LLM
-Streamlit
+- Python
+- XGBoost
+- SHAP
+- LangChain
+- FAISS
+- Mistral LLM
+- Streamlit
 
 ## Contributions
 Oumnia Chiouikh
-  Design and implementation of the multi-agent architecture (LangChain orchestrator)
-  Development of the XGBoost predictive model
-  Integration of SHAP explainability and patient clustering
-  Implementation of the Streamlit dashboard
-  System integration and end-to-end pipeline
+- Design and implementation of the multi-agent architecture (LangChain orchestrator)
+- Development of the XGBoost predictive model
+- Integration of SHAP explainability and patient clustering
+- Implementation of the Streamlit dashboard
+- System integration and end-to-end pipeline
 Cynthia Ayetolou
-  Development of the RAG pipeline (FAISS + embeddings)
-  Integration of the Mistral LLM for medical question answering
-  Implementation of personalised lifestyle recommendation generation
-  Construction and structuring of the medical knowledge base
-  Contribution to testing and system validation
+- Development of the RAG pipeline (FAISS + embeddings)
+- Integration of the Mistral LLM for medical question answering
+- Implementation of personalised lifestyle recommendation generation
+- Construction and structuring of the medical knowledge base
+- Contribution to testing and system validation
 
 ## Authors
 
@@ -117,3 +117,4 @@ Cynthia Ayetolou
 
 M1 IoT — Université Marie et Louis Pasteur
 2025–2026
+

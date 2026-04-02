@@ -115,7 +115,7 @@ This project is intended for educational and research purposes only. It is not a
 
 ## Authors
 
-Oumnia Chiouikh
+Oumnia Chiouikh,
 Cynthia Ayetolou
 
 M1 IoT — Université Marie et Louis Pasteur

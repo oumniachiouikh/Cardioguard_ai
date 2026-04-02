@@ -72,6 +72,7 @@ Based on the Cleveland Heart Disease Dataset (UCI Repository):
 pip install -r requirements.txt
 python data/generate_data.py
 streamlit run app.py
+```
 
 ## Project Structure
 

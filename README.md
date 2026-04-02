@@ -1,7 +1,5 @@
 # ❤️ CardioGuard AI
 
-# CardioGuard AI
-
 A multi-agent artificial intelligence system for cardiovascular risk prediction and personalised lifestyle intervention.
 
 ---
@@ -39,12 +37,12 @@ CardioOrchestrator — LangChain Router
           │
   ┌───────┼───────┬──────────┬──────────┬──────────┐
   ▼       ▼       ▼          ▼          ▼          ▼
-Agent1  Agent2  Agent3    Agent4     Agent5    Agent6
-Data    XGB     RAG      Mistral    Alerts   SHAP+KMeans
-         │       │          │          │          │
-         ▼       ▼          ▼          ▼          ▼
-  cardio_data  FAISS     Mistral   Clinical   XGBoost
-     .csv      Index      LLM     Thresholds   Model
+Agent1  Agent2  Agent3     Agent4     Agent5    Agent6
+Data    XGB     RAG       Mistral     Alerts   SHAP+KMeans
+          │       │          │          │          │
+          ▼       ▼          ▼          ▼          ▼
+  cardio_data  FAISS      Mistral    Clinical   XGBoost
+     .csv      Index       LLM      Thresholds   Model
 
 ---
 

@@ -78,18 +78,9 @@ streamlit run app.py
 
 cardioguard/
 ├── app.py
-├── requirements.txt
-├── README.md
-├── cardioguard_demo.html     ← standalone browser demo
 ├── agents/
-│   ├── orchestrator.py
-│   ├── data_agent.py
-│   ├── predict_agent.py
-│   ├── rag_agent.py
-│   ├── explain_agent.py
-│   ├── alert_agent.py
-│   └── shap_agent.py
 ├── data/
+<<<<<<< HEAD
 │   ├── generate_data.py
 │   └── cardio_data.csv
 └── models/
@@ -128,7 +119,43 @@ Cynthia Ayetolou
 M1 IoT — Université Marie et Louis Pasteur
 2025–2026
 
+=======
+├── models/
+└── README.md
+>>>>>>> f94094cd10cf3cb8688064daf7f2fea0e10d7d4b
 
----
+## Tech Stack
+Python
+XGBoost
+SHAP
+LangChain
+FAISS
+Mistral LLM
+Streamlit
 
-*Student project — M1 IoT · Université de Franche-Comté · 2025–2026*
+## Contributions
+Oumnia Chiouikh
+  Design and implementation of the multi-agent architecture (LangChain orchestrator)
+  Development of the XGBoost predictive model
+  Integration of SHAP explainability and patient clustering
+  Implementation of the Streamlit dashboard
+  System integration and end-to-end pipeline
+Cynthia Ayetolou
+  Development of the RAG pipeline (FAISS + embeddings)
+  Integration of the Mistral LLM for medical question answering
+  Implementation of personalised lifestyle recommendation generation
+  Construction and structuring of the medical knowledge base
+  Contribution to testing and system validation
+
+## Disclaimer
+
+This project is intended for educational and research purposes only.
+It is not a medical diagnosis tool.
+
+## Authors
+
+Oumnia Chiouikh
+Cynthia Ayetolou
+
+M1 IoT — Université Marie et Louis Pasteur
+2025–2026

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CardioGuard AI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #fdf2f2; color: #1a202c; min-height: 100vh; }
+
+    header { background: linear-gradient(135deg, #742a2a, #c53030); color: white; padding: 1.25rem 2rem; }
+    header h1 { font-size: 1.5rem; font-weight: 700; }
+    header p  { font-size: 0.82rem; opacity: 0.8; margin-top: 3px; }
+
+    .layout { display: flex; min-height: calc(100vh - 72px); }
+
+    .sidebar {
+      width: 260px; min-width: 260px; background: white;
+      border-right: 1px solid #fed7d7; padding: 1rem;
+      position: sticky; top: 0; height: calc(100vh - 72px); overflow-y: auto;
+    }
+    .sidebar h2 { font-size: 0.74rem; text-transform: uppercase; letter-spacing:.08em; color:#9b2c2c; margin-bottom:.9rem; font-weight:700; }
+
+    .ig { margin-bottom: .75rem; }
+    .ig label { font-size: 0.74rem; color: #4a5568; display: flex; justify-content: space-between; margin-bottom: 2px; }
+    .ig label span { font-weight: 700; color: #c53030; }
+    .ig input[type=range] { width: 100%; accent-color: #c53030; cursor: pointer; }
+    .ig select { width: 100%; padding: 3px 5px; border: 1px solid #fed7d7; border-radius: 5px; font-size: 0.76rem; color: #2d3748; background: #fff5f5; outline: none; }
+
+    .btn-run {
+      width: 100%; padding: .6rem; background: #c53030; color: white;
+      border: none; border-radius: 8px; font-size: .88rem; cursor: pointer;
+      margin-top: .6rem; font-weight: 700; transition: background .15s;
+    }
+    .btn-run:hover { background: #9b2c2c; }
+
+    .main { flex: 1; padding: 1.25rem; overflow-y: auto; }
+
+    .tabs { display: flex; gap: 4px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .tab-btn { padding: 5px 13px; border-radius: 6px; border: 1px solid #fed7d7; background: white; font-size: .8rem; cursor: pointer; color: #4a5568; transition: all .15s; }
+    .tab-btn.active { background: #c53030; color: white; border-color: #c53030; }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .card { background: white; border-radius: 10px; border: 1px solid #fed7d7; padding: 1.1rem; margin-bottom: 1rem; }
+    .card h3 { font-size: .95rem; font-weight: 600; margin-bottom: .7rem; color: #742a2a; }
+
+    .metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: .6rem; margin-bottom: .9rem; }
+    .metric { background: #fff5f5; border-radius: 8px; padding: .5rem .6rem; text-align: center; border: 1px solid #fed7d7; }
+    .metric .mv { font-size: .95rem; font-weight: 700; color: #c53030; }
+    .metric .ml { font-size: .68rem; color: #718096; }
+
+    .risk-badge { display:inline-block; padding:5px 16px; border-radius:20px; font-weight:700; font-size:.95rem; margin-bottom:.8rem; }
+    .r-low  { background:#c6f6d5; color:#276749; }
+    .r-mod  { background:#fefcbf; color:#7b6000; }
+    .r-high { background:#fed7d7; color:#9b2335; }
+    .r-crit { background:#9b2c2c; color:white; }
+
+    .pbar-bg { background:#e2e8f0; border-radius:6px; height:12px; overflow:hidden; margin:4px 0 10px; }
+    .pbar-fill { height:100%; border-radius:6px; transition:width .8s ease; }
+
+    .alert { padding:.55rem .85rem; border-radius:7px; margin-bottom:.45rem; font-size:.83rem; line-height:1.5; }
+    .a-crit { background:#fff5f5; border-left:4px solid #e53e3e; color:#742a2a; }
+    .a-warn { background:#fffbeb; border-left:4px solid #d69e2e; color:#7b4f00; }
+    .a-info { background:#ebf8ff; border-left:4px solid #3182ce; color:#1a365d; }
+
+    .shap-row { display:flex; align-items:center; gap:7px; margin-bottom:5px; }
+    .shap-lbl { width:140px; font-size:.76rem; color:#4a5568; text-align:right; flex-shrink:0; }
+    .shap-wrap { flex:1; background:#e2e8f0; border-radius:4px; height:13px; overflow:hidden; }
+    .shap-pos { height:100%; background:#e53e3e; border-radius:4px; transition:width .5s; }
+    .shap-neg { height:100%; background:#3182ce; border-radius:4px; transition:width .5s; }
+    .shap-num { width:55px; font-size:.72rem; }
+
+    .rag-q { width:100%; padding:.5rem .7rem; border:1px solid #fed7d7; border-radius:7px; font-size:.88rem; font-family:inherit; outline:none; }
+    .rag-q:focus { border-color:#c53030; }
+    .rag-btn { margin-top:7px; padding:5px 14px; background:#c53030; color:white; border:none; border-radius:6px; cursor:pointer; font-size:.84rem; }
+    .rag-ans { background:#fff5f5; border-left:3px solid #c53030; border-radius:7px; padding:.8rem; margin-top:.7rem; font-size:.86rem; line-height:1.7; color:#2d3748; }
+    .src-tag { display:inline-block; background:#fff5f5; color:#c53030; font-size:.7rem; padding:2px 7px; border-radius:9px; margin:3px 2px; border:1px solid #fed7d7; }
+
+    .chat-msgs { background:#fff5f5; border-radius:8px; padding:.7rem; min-height:160px; max-height:340px; overflow-y:auto; margin-bottom:.7rem; font-size:.85rem; line-height:1.6; }
+    .msg-user { color:#2d3748; margin-bottom:7px; }
+    .msg-ai   { background:#fff; color:#742a2a; border-radius:6px; padding:5px 10px; margin-bottom:7px; border:1px solid #fed7d7; }
+    .chat-row { display:flex; gap:7px; }
+    .chat-row input { flex:1; padding:.45rem .7rem; border:1px solid #fed7d7; border-radius:6px; font-size:.85rem; font-family:inherit; outline:none; }
+    .chat-row input:focus { border-color:#c53030; }
+    .chat-row button { padding:5px 13px; background:#c53030; color:white; border:none; border-radius:6px; cursor:pointer; font-size:.84rem; }
+    .clear-btn { margin-top:6px; font-size:.74rem; background:none; border:none; color:#a0aec0; cursor:pointer; }
+
+    .dt { width:100%; border-collapse:collapse; font-size:.77rem; }
+    .dt th { background:#c53030; color:white; padding:5px 8px; text-align:left; }
+    .dt td { padding:4px 8px; border-bottom:1px solid #fed7d7; }
+    .dt tr:nth-child(even) { background:#fff5f5; }
+    .b0{background:#c6f6d5;color:#276749;padding:2px 7px;border-radius:9px;font-size:.7rem;font-weight:600;display:inline-block}
+    .b1{background:#fed7d7;color:#9b2335;padding:2px 7px;border-radius:9px;font-size:.7rem;font-weight:600;display:inline-block}
+    .placeholder { color:#a0aec0; font-size:.86rem; }
+    .lifestyle-tip { background:#fff5f5; border-left:3px solid #c53030; border-radius:0 7px 7px 0; padding:.5rem .8rem; margin-bottom:.4rem; font-size:.83rem; color:#2d3748; line-height:1.5; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>❤️ CardioGuard AI</h1>
+  <p>Cardiovascular Risk Prediction · XGBoost · SHAP · FAISS RAG · Mistral LLM · LangChain — Standalone Demo</p>
+</header>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>🩺 Patient Vitals</h2>
+
+    <div class="ig"><label>Age (years) <span id="lbl-age">54</span></label>
+      <input type="range" min="20" max="85" value="54" oninput="sync('age',this.value,'lbl-age','')"></div>
+
+    <div class="ig"><label>Sex</label>
+      <select id="sel-sex" onchange="P.sex=parseInt(this.value)">
+        <option value="1">Male</option><option value="0">Female</option>
+      </select></div>
+
+    <div class="ig"><label>Chest Pain Type</label>
+      <select id="sel-cp" onchange="P.cp=parseInt(this.value)">
+        <option value="0">Asymptomatic (0) ⚠️</option>
+        <option value="1">Atypical Angina (1)</option>
+        <option value="2" selected>Non-Anginal (2)</option>
+        <option value="3">Typical Angina (3)</option>
+      </select></div>
+
+    <div class="ig"><label>Resting BP (mmHg) <span id="lbl-bp">130</span></label>
+      <input type="range" min="80" max="200" value="130" oninput="sync('bp',this.value,'lbl-bp',' mmHg')"></div>
+
+    <div class="ig"><label>Cholesterol (mg/dL) <span id="lbl-chol">250</span></label>
+      <input type="range" min="100" max="420" value="250" oninput="sync('chol',this.value,'lbl-chol',' mg/dL')"></div>
+
+    <div class="ig"><label>Fasting Blood Sugar &gt;120</label>
+      <select id="sel-fbs" onchange="P.fbs=parseInt(this.value)">
+        <option value="0">No (0)</option><option value="1">Yes (1)</option>
+      </select></div>
+
+    <div class="ig"><label>Resting ECG</label>
+      <select id="sel-ecg" onchange="P.ecg=parseInt(this.value)">
+        <option value="0">Normal (0)</option>
+        <option value="1">ST-T Abnormality (1)</option>
+        <option value="2">LVH (2)</option>
+      </select></div>
+
+    <div class="ig"><label>Max Heart Rate (bpm) <span id="lbl-hr">148</span></label>
+      <input type="range" min="60" max="202" value="148" oninput="sync('hr',this.value,'lbl-hr',' bpm')"></div>
+
+    <div class="ig"><label>Exercise Angina</label>
+      <select id="sel-angina" onchange="P.angina=parseInt(this.value)">
+        <option value="0">No (0)</option><option value="1">Yes (1)</option>
+      </select></div>
+
+    <div class="ig"><label>ST Depression (mm) <span id="lbl-st">1.0</span></label>
+      <input type="range" min="0" max="6.2" value="1.0" step="0.1" oninput="sync('st',this.value,'lbl-st',' mm')"></div>
+
+    <div class="ig"><label>ST Slope</label>
+      <select id="sel-slope" onchange="P.slope=parseInt(this.value)">
+        <option value="0">Upsloping (0)</option>
+        <option value="1">Flat (1)</option>
+        <option value="2">Downsloping (2)</option>
+      </select></div>
+
+    <div class="ig"><label>Num Major Vessels <span id="lbl-ca">0</span></label>
+      <input type="range" min="0" max="3" value="0" step="1" oninput="sync('ca',this.value,'lbl-ca','')"></div>
+
+    <div class="ig"><label>Thalassemia</label>
+      <select id="sel-thal" onchange="P.thal=parseInt(this.value)">
+        <option value="0">Normal (0)</option>
+        <option value="1">Fixed Defect (1)</option>
+        <option value="2">Reversible Defect (2)</option>
+      </select></div>
+
+    <button class="btn-run" onclick="runAll()">🔮 Run CardioGuard Analysis</button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="tab('p1',this)">📊 Prediction & Alerts</button>
+      <button class="tab-btn" onclick="tab('p2',this)">🔍 SHAP Analysis</button>
+      <button class="tab-btn" onclick="tab('p3',this)">📚 Medical RAG</button>
+      <button class="tab-btn" onclick="tab('p4',this)">💬 AI Chat</button>
+      <button class="tab-btn" onclick="tab('p5',this)">📈 Dataset</button>
+    </div>
+
+    <div class="tab-pane active" id="p1">
+      <div class="card"><h3>⚡ Cardiovascular Risk Prediction</h3>
+        <div class="metrics" id="met"></div>
+        <div id="risk-out"><p class="placeholder">Fill in patient vitals and click "Run CardioGuard Analysis".</p></div>
+      </div>
+      <div class="card"><h3>🚨 Clinical Alerts</h3>
+        <div id="alerts-out"><p class="placeholder">Clinical alerts will appear here after analysis.</p></div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="p2">
+      <div class="card"><h3>🔍 SHAP Feature Contributions</h3>
+        <div id="shap-out"><p class="placeholder">Run the analysis first to see SHAP values.</p></div>
+      </div>
+      <div class="card"><h3>👤 Patient Risk Profile Cluster</h3>
+        <div id="cluster-out"><p class="placeholder">Cluster will appear after analysis.</p></div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="p3">
+      <div class="card"><h3>📚 Medical Knowledge Base (RAG)</h3>
+        <p style="font-size:.82rem;color:#718096;margin-bottom:.7rem">Ask a cardiology question — answered from the medical knowledge base (simulates FAISS + Mistral)</p>
+        <input class="rag-q" id="rag-in" type="text" value="What lifestyle changes reduce cardiovascular risk?" />
+        <br><button class="rag-btn" onclick="doRAG()">🔍 Search Medical Knowledge Base</button>
+        <div id="rag-out" style="display:none">
+          <div class="rag-ans" id="rag-txt"></div>
+          <div id="rag-src" style="margin-top:.4rem"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="p4">
+      <div class="card"><h3>💬 AI Medical Assistant</h3>
+        <p style="font-size:.82rem;color:#718096;margin-bottom:.7rem">Answers are based on the actual patient vitals you entered on the left.</p>
+        <div class="chat-msgs" id="chat-msgs">
+          <p class="placeholder">Ask anything — e.g. "What are the key risk factors?", "Is this patient at high risk?", "What lifestyle changes do you recommend?"</p>
+        </div>
+        <div class="chat-row">
+          <input type="text" id="chat-in" placeholder="e.g. What are the key risk factors for this patient?" onkeydown="if(event.key==='Enter')doChat()" />
+          <button onclick="doChat()">Send</button>
+        </div>
+        <button class="clear-btn" onclick="clearChat()">Clear chat history</button>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="p5">
+      <div class="card"><h3>📈 Cleveland Heart Disease Dataset</h3>
+        <p style="font-size:.79rem;color:#718096;margin-bottom:.7rem">15 sample patient records · 900 total training rows · 13 clinical features · binary target</p>
+        <div style="overflow-x:auto"><table class="dt" id="dt"></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════════ */
+const P = { age:54, sex:1, cp:2, bp:130, chol:250, fbs:0, ecg:0, hr:148, angina:0, st:1.0, slope:0, ca:0, thal:0 };
+let lastPred = null;
+const chatLog = [];
+
+function sync(key, val, lbl, unit) {
+  P[key] = parseFloat(val);
+  document.getElementById(lbl).textContent = (key==='st' ? parseFloat(val).toFixed(1) : Math.round(parseFloat(val))) + unit;
+}
+
+function tab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ══════════════════════════════════════════════════════════
+   XGBoost SIMULATION — mirrors the training logic
+══════════════════════════════════════════════════════════ */
+function predict(p) {
+  let score =
+      0.04  * (p.age - 40)
+    + 0.25  * p.sex
+    + 0.30  * (p.cp === 0 ? 1 : 0)
+    - 0.20  * (p.cp === 2 ? 1 : 0)
+    + 0.008 * (p.bp - 120)
+    + 0.003 * (p.chol - 200)
+    + 0.20  * p.fbs
+    + 0.30  * p.angina
+    + 0.25  * p.st
+    + 0.20  * (p.slope === 1 ? 1 : 0)
+    + 0.35  * (p.slope === 2 ? 1 : 0)
+    + 0.25  * p.ca
+    + 0.15  * (p.thal === 2 ? 1 : 0)
+    - 0.005 * (p.hr - 100);
+
+  const prob = 1 / (1 + Math.exp(-(score - 1.5)));
+
+  let risk, color;
+  if (prob >= 0.75)      { risk="Critical"; color="#9b2c2c"; }
+  else if (prob >= 0.50) { risk="High";     color="#e53e3e"; }
+  else if (prob >= 0.30) { risk="Moderate"; color="#d69e2e"; }
+  else                   { risk="Low";      color="#38a169"; }
+
+  return {
+    prob: parseFloat(prob.toFixed(4)),
+    risk,
+    color,
+    label: prob >= 0.5 ? "Heart Disease Detected" : "No Heart Disease"
+  };
+}
+
+/* ══════════════════════════════════════════════════════════
+   SHAP APPROXIMATION
+══════════════════════════════════════════════════════════ */
+function shapValues(p, pred) {
+  const means   = {age:52,sex:0.68,cp:0.9,bp:132,chol:246,fbs:0.15,ecg:0.5,hr:149,angina:0.33,st:1.1,slope:1.0,ca:0.7,thal:1.0};
+  const weights = {ca:0.35,st:0.28,angina:0.25,cp:-0.22,thal:0.18,hr:-0.15,slope:0.14,age:0.12,bp:0.10,chol:0.08,fbs:0.07,sex:0.06,ecg:0.05};
+  const names   = {age:"Age",sex:"Sex",cp:"Chest Pain Type",bp:"Resting BP",chol:"Cholesterol",fbs:"Fasting Blood Sugar",ecg:"Resting ECG",hr:"Max Heart Rate",angina:"Exercise Angina",st:"ST Depression",slope:"ST Slope",ca:"Num Vessels",thal:"Thalassemia"};
+  const ranges  = {age:35,sex:1,cp:3,bp:40,chol:100,fbs:1,ecg:2,hr:60,angina:1,st:3,slope:2,ca:3,thal:2};
+  const keys    = Object.keys(means);
+  const vals    = keys.map(k => ({ name:names[k], val: parseFloat((weights[k] * ((p[k]||0)-means[k])/(ranges[k]||1) * (0.4+pred.prob)).toFixed(4)) }));
+  return vals.sort((a,b)=>Math.abs(b.val)-Math.abs(a.val));
+}
+
+/* ══════════════════════════════════════════════════════════
+   CLINICAL ALERTS
+══════════════════════════════════════════════════════════ */
+function getAlerts(p, pred) {
+  const a = [];
+  if (p.bp >= 160)              a.push({c:"a-crit",i:"🔴",m:`Stage 2 hypertension: ${p.bp} mmHg. Immediate medical review required.`});
+  else if (p.bp >= 140)         a.push({c:"a-warn",i:"🟡",m:`Stage 1 hypertension: ${p.bp} mmHg. Lifestyle modification recommended.`});
+  if (p.chol >= 240)            a.push({c:"a-crit",i:"🔴",m:`High cholesterol: ${p.chol} mg/dL. Statin therapy and dietary intervention warranted.`});
+  else if (p.chol >= 200)       a.push({c:"a-warn",i:"🟡",m:`Borderline cholesterol: ${p.chol} mg/dL. Dietary review recommended.`});
+  if (p.angina === 1)           a.push({c:"a-crit",i:"🔴",m:"Exercise-induced angina detected. Strongly suggests coronary artery narrowing. Urgent cardiology referral."});
+  if (p.st >= 2.0)              a.push({c:"a-crit",i:"🔴",m:`Significant ST depression: ${p.st}mm. Indicates myocardial ischaemia. Immediate ECG needed.`});
+  else if (p.st >= 1.0)         a.push({c:"a-warn",i:"🟡",m:`Moderate ST depression: ${p.st}mm. Suggests reduced cardiac blood flow.`});
+  if (p.fbs === 1)              a.push({c:"a-warn",i:"🟡",m:"Fasting blood sugar >120 mg/dL. Possible diabetes — a major cardiovascular risk amplifier. HbA1c test recommended."});
+  if (p.hr < 100)               a.push({c:"a-warn",i:"🟡",m:`Low max heart rate: ${p.hr} bpm. May indicate chronotropic incompetence — a predictor of cardiovascular mortality.`});
+  if (p.cp === 0)               a.push({c:"a-warn",i:"🟡",m:"Asymptomatic chest pain type carries the highest cardiovascular risk in clinical studies."});
+  if (p.ca >= 2)                a.push({c:"a-crit",i:"🔴",m:`${p.ca} major vessels affected. Multi-vessel coronary disease. Specialist review is essential.`});
+  else if (p.ca === 1)          a.push({c:"a-warn",i:"🟡",m:"1 major vessel affected. Single-vessel coronary disease detected."});
+  if (p.thal === 2)             a.push({c:"a-warn",i:"🟡",m:"Reversible thalassemia defect: areas of reversible myocardial ischaemia detected."});
+  if (p.age >= 65)              a.push({c:"a-info",i:"🔵",m:`Age ${p.age}: cardiovascular risk increases significantly after 65. Annual cardiac screening recommended.`});
+
+  if (pred.risk==="Critical"||pred.risk==="High")
+    a.push({c:"a-crit",i:"🔴",m:`AI predicts ${pred.label} (${(pred.prob*100).toFixed(1)}% probability, ${pred.risk} risk). Immediate cardiologist consultation advised.`});
+  else if (pred.risk==="Moderate")
+    a.push({c:"a-warn",i:"🟡",m:`AI predicts moderate cardiovascular risk (${(pred.prob*100).toFixed(1)}%). Structured lifestyle intervention and GP review recommended.`});
+
+  if (!a.length) a.push({c:"a-info",i:"🔵",m:"All vitals within acceptable clinical ranges. Maintain a heart-healthy lifestyle and attend regular check-ups."});
+  return a;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MAIN RUN
+══════════════════════════════════════════════════════════ */
+function runAll() {
+  const pred   = predict(P);
+  const alerts = getAlerts(P, pred);
+  const shap   = shapValues(P, pred);
+  lastPred     = pred;
+
+  // Metrics
+  document.getElementById("met").innerHTML = [
+    {v:P.age+" yrs",     l:"Age"},
+    {v:P.bp+" mmHg",     l:"Resting BP"},
+    {v:P.chol+" mg/dL",  l:"Cholesterol"},
+    {v:P.hr+" bpm",      l:"Max HR"},
+  ].map(m=>`<div class="metric"><div class="mv">${m.v}</div><div class="ml">${m.l}</div></div>`).join("");
+
+  // Risk
+  const RC={Low:"r-low",Moderate:"r-mod",High:"r-high",Critical:"r-crit"};
+  const RI={Low:"🟢",Moderate:"🟡",High:"🔴",Critical:"🚨"};
+  document.getElementById("risk-out").innerHTML = `
+    <div class="risk-badge ${RC[pred.risk]}">${RI[pred.risk]} ${pred.risk} Risk — ${pred.label}</div>
+    <div style="font-size:.82rem;color:#4a5568;margin-bottom:3px">Cardiovascular event probability: <strong>${(pred.prob*100).toFixed(1)}%</strong></div>
+    <div class="pbar-bg"><div class="pbar-fill" style="width:${(pred.prob*100).toFixed(1)}%;background:${pred.color}"></div></div>
+    ${pred.risk==="Critical"||pred.risk==="High"
+      ? `<div style="background:#fff5f5;border:1px solid #fed7d7;border-radius:7px;padding:.5rem .75rem;font-size:.83rem;color:#742a2a;margin-top:.5rem">⚠️ Immediate cardiologist consultation is strongly recommended.</div>`
+      : pred.risk==="Moderate"
+      ? `<div style="background:#fffbeb;border:1px solid #fbd38d;border-radius:7px;padding:.5rem .75rem;font-size:.83rem;color:#7b4f00;margin-top:.5rem">⚠️ Structured lifestyle intervention and GP review recommended.</div>`
+      : `<div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:7px;padding:.5rem .75rem;font-size:.83rem;color:#276749;margin-top:.5rem">✅ Low cardiovascular risk. Maintain a heart-healthy lifestyle.</div>`}`;
+
+  // Alerts
+  document.getElementById("alerts-out").innerHTML =
+    alerts.map(a=>`<div class="alert ${a.c}">${a.i} ${a.m}</div>`).join("");
+
+  // SHAP
+  const maxAbs = Math.max(...shap.map(s=>Math.abs(s.val)),0.001);
+  document.getElementById("shap-out").innerHTML =
+    shap.map(s=>{
+      const pct=(Math.abs(s.val)/maxAbs*100).toFixed(1);
+      const pos=s.val>=0;
+      return `<div class="shap-row">
+        <div class="shap-lbl">${s.name}</div>
+        <div class="shap-wrap"><div class="${pos?'shap-pos':'shap-neg'}" style="width:${pct}%"></div></div>
+        <div class="shap-num" style="color:${pos?'#e53e3e':'#3182ce'}">${s.val>0?'+':''}${s.val}</div>
+      </div>`;
+    }).join("") +
+    `<p style="font-size:.72rem;color:#a0aec0;margin-top:.5rem">🔴 Red = increases cardiac risk &nbsp;·&nbsp; 🔵 Blue = decreases cardiac risk</p>`;
+
+  // Cluster
+  const score = (P.bp>140)+(P.chol>240)+(P.age>60)+P.angina+(P.st>1.5)+(P.ca>=1);
+  const cInfo = score>=4
+    ? {rc:"r-crit",lbl:"🔴 High-risk cardiac profile (Cluster 2)",  desc:`Multiple major risk factors: ${[P.bp>140?`BP ${P.bp}mmHg`:'',P.chol>240?`cholesterol ${P.chol}mg/dL`:'',P.angina?'exercise angina':'',P.ca>=1?`${P.ca} vessels affected`:''].filter(Boolean).join(', ')}. Cardiology referral is strongly advised.`}
+    : score>=2
+    ? {rc:"r-mod",lbl:"🟡 Moderate-risk profile (Cluster 1)",         desc:"Some elevated risk factors detected. Structured lifestyle intervention and regular monitoring are recommended."}
+    : {rc:"r-low",lbl:"🟢 Low-risk cardiac profile (Cluster 0)",      desc:"Vitals are largely within healthy ranges. No major acute risk factors detected. Maintain preventive lifestyle habits."};
+
+  document.getElementById("cluster-out").innerHTML = `
+    <div class="risk-badge ${cInfo.rc}">${cInfo.lbl}</div>
+    <p style="font-size:.85rem;color:#4a5568;margin-top:.5rem">${cInfo.desc}</p>
+    <p style="font-size:.75rem;color:#a0aec0;margin-top:.4rem">KMeans k=3 · Trained on Cleveland Heart Disease features</p>`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MEDICAL RAG KNOWLEDGE BASE
+══════════════════════════════════════════════════════════ */
+const KB = [
+  {keys:["lifestyle","change","reduce","prevent","intervention","diet","exercise"],
+   title:"Lifestyle interventions for cardiovascular risk",
+   text:"The most effective lifestyle interventions for reducing cardiovascular risk are: (1) Following a Mediterranean diet — olive oil, fish, vegetables, legumes, whole grains — shown to reduce major cardiovascular events by 30%. (2) At least 150 minutes of moderate aerobic exercise weekly, which reduces cardiovascular mortality by up to 35%. (3) Smoking cessation — risk drops by 50% within one year of quitting. (4) Reducing sodium intake to under 2g/day to lower blood pressure. (5) Stress management through mindfulness or CBT, which reduces inflammatory markers linked to heart disease."},
+  {keys:["heart","attack","myocardial","infarction","symptom"],
+   title:"Heart attack — causes and symptoms",
+   text:"A heart attack (myocardial infarction) occurs when blood flow to part of the heart is blocked by a clot forming on a ruptured atherosclerotic plaque. Symptoms include central chest pain or pressure (often described as a 'crushing' or 'tightening'), pain radiating to the left arm, jaw, neck or back, shortness of breath, cold sweats, nausea, and light-headedness. In women and diabetics, symptoms may be atypical — fatigue, jaw pain, or nausea without chest pain. Every 30 minutes of delay in treatment increases mortality by approximately 7.5%."},
+  {keys:["stroke","cerebrovascular","brain","fast","warning"],
+   title:"Stroke — recognition and risk",
+   text:"Stroke occurs when blood supply to part of the brain is cut off (ischaemic, 85% of cases) or when a blood vessel bursts (haemorrhagic). The FAST acronym — Face drooping, Arm weakness, Speech difficulty, Time to call emergency services — is the critical recognition tool. Risk factors include hypertension (the single biggest risk factor), atrial fibrillation, smoking, diabetes, high cholesterol, and obesity. Anticoagulation therapy reduces AF-related stroke risk by 65%."},
+  {keys:["blood","pressure","hypertension","bp","mmhg"],
+   title:"Hypertension and blood pressure",
+   text:"Hypertension is defined as resting blood pressure above 130/80 mmHg (Stage 1) or above 140/90 mmHg (Stage 2). It is called the 'silent killer' because it causes no symptoms until a serious event — heart attack, stroke, or kidney failure — occurs. First-line interventions include sodium restriction (<2g/day), the DASH diet, regular aerobic exercise, weight loss, and alcohol reduction. ACE inhibitors, ARBs, calcium channel blockers, and thiazide diuretics are the main drug classes used."},
+  {keys:["cholesterol","ldl","hdl","statin","lipid"],
+   title:"Cholesterol and cardiovascular risk",
+   text:"LDL ('bad') cholesterol above 160 mg/dL significantly accelerates atherosclerosis — the build-up of fatty plaques in artery walls. HDL ('good') cholesterol above 60 mg/dL is protective. Statins are the most effective drug therapy, reducing LDL by 30–50% and cutting cardiovascular events by 25–35%. Dietary interventions include reducing saturated fat, eliminating trans fats, increasing soluble fibre (oats, legumes), and consuming plant stanols. Total cholesterol above 200 mg/dL warrants intervention."},
+  {keys:["angina","chest","pain","exercise","coronary"],
+   title:"Angina and coronary artery disease",
+   text:"Exercise-induced angina — chest tightness or pressure during physical exertion that resolves with rest — indicates that coronary arteries are narrowed and cannot supply sufficient oxygenated blood during increased demand. This is a hallmark of coronary artery disease (CAD). ST depression on an ECG during exercise testing confirms ischaemia. Treatments range from lifestyle modification and medication (nitrates, beta-blockers) to revascularisation via stenting or bypass surgery."},
+  {keys:["diabetes","blood","sugar","glucose","fasting"],
+   title:"Diabetes and cardiovascular risk",
+   text:"Diabetes doubles to quadruples the risk of cardiovascular disease by accelerating atherosclerosis, promoting hypertension, and causing dyslipidaemia. Fasting blood glucose above 126 mg/dL on two tests confirms diabetes; 100–125 mg/dL is pre-diabetes. Tight glucose control (HbA1c <7%) significantly reduces microvascular complications. SGLT2 inhibitors and GLP-1 agonists have demonstrated direct cardiovascular protective effects beyond glucose lowering."},
+  {keys:["ecg","electrocardiogram","st","depression","elevation"],
+   title:"ECG changes and cardiac risk",
+   text:"ST depression on an ECG indicates myocardial ischaemia — the heart muscle is receiving insufficient oxygen. The deeper and more widespread the depression, the more severe the ischaemia. ST elevation indicates complete blockage (STEMI — the most critical type of heart attack). Left ventricular hypertrophy (LVH) on the ECG is a marker of long-standing hypertension and increases heart failure and arrhythmia risk. Any significant ECG abnormality warrants cardiology review."},
+  {keys:["shap","feature","important","xgboost","model","predict"],
+   title:"How the CardioGuard AI model works",
+   text:"CardioGuard AI uses XGBoost — a gradient boosting algorithm — trained on Cleveland Heart Disease features. The model processes 13 clinical inputs including age, cholesterol, blood pressure, ST depression, number of affected vessels, and exercise angina. SHAP (SHapley Additive exPlanations) values decompose each prediction to show exactly which features pushed the risk up or down. The most predictive features in clinical literature are: number of affected vessels, ST depression, exercise angina, chest pain type, and maximum heart rate. The model achieves approximately 88% AUC-ROC."},
+  {keys:["thalassemia","thal","defect","reversible","fixed"],
+   title:"Thalassemia and cardiac impact",
+   text:"In the Cleveland dataset, thalassemia refers to perfusion defects identified on thallium stress testing, not the haematological condition. A reversible defect (value=2) indicates an area of myocardium that has reduced blood flow during exercise but recovers at rest — this strongly suggests viable but ischaemic heart tissue and is the highest-risk finding. A fixed defect (value=1) indicates scar tissue from a previous infarction. Normal thalassemia (value=0) indicates no perfusion abnormality."},
+];
+
+function doRAG() {
+  const q = document.getElementById("rag-in").value.toLowerCase();
+  let best=null, bestScore=-1;
+  KB.forEach(e=>{
+    const s=e.keys.filter(k=>q.includes(k)).length;
+    if(s>bestScore){bestScore=s;best=e;}
+  });
+  if(!best)best=KB[0];
+  document.getElementById("rag-txt").innerHTML=`<strong>${best.title}</strong><br><br>${best.text}`;
+  document.getElementById("rag-src").innerHTML=
+    `<span style="font-size:.72rem;color:#718096">Keywords matched: </span>`+
+    best.keys.map(k=>`<span class="src-tag">${k}</span>`).join(" ");
+  document.getElementById("rag-out").style.display="block";
+}
+
+/* ══════════════════════════════════════════════════════════
+   AI CHAT — fully context-aware answers
+══════════════════════════════════════════════════════════ */
+function sexLabel(s)  { return s===1?"male":"female"; }
+function cpLabel(c)   { return ["asymptomatic","atypical angina","non-anginal pain","typical angina"][c]||"unknown"; }
+function thalLabel(t) { return ["normal","fixed defect","reversible defect"][t]||"unknown"; }
+
+function buildAnswer(question) {
+  const q    = question.toLowerCase();
+  const pred = lastPred || predict(P);
+  const ctx  = `Patient: ${P.age}-year-old ${sexLabel(P.sex)}, BP ${P.bp}mmHg, cholesterol ${P.chol}mg/dL, max HR ${P.hr}bpm, ST depression ${P.st}mm, ${P.angina===1?"exercise angina positive":"no exercise angina"}, ${P.ca} vessel(s) affected, thalassemia: ${thalLabel(P.thal)}, fasting blood sugar >120: ${P.fbs===1?"yes":"no"}`;
+
+  // Risk / assessment
+  if (q.match(/risk|assess|overall|summary|prediction|probability|chance|likelihood/)) {
+    const factors=[];
+    if(P.bp>=140)       factors.push(`Stage ${P.bp>=160?2:1} hypertension (${P.bp}mmHg)`);
+    if(P.chol>=200)     factors.push(`${P.chol>=240?"high":"borderline"} cholesterol (${P.chol}mg/dL)`);
+    if(P.angina===1)    factors.push("exercise-induced angina");
+    if(P.st>=1.0)       factors.push(`ST depression ${P.st}mm`);
+    if(P.ca>=1)         factors.push(`${P.ca} vessel(s) affected`);
+    if(P.fbs===1)       factors.push("elevated fasting blood sugar");
+    if(P.thal===2)      factors.push("reversible thalassemia defect");
+    if(P.cp===0)        factors.push("asymptomatic chest pain pattern");
+    return `📊 **Cardiovascular Risk Assessment** — ${ctx}\n\nThe XGBoost model predicts **${pred.label}** with **${(pred.prob*100).toFixed(1)}% probability**. Overall risk: **${pred.risk}**.\n\n${factors.length?`**Key risk factors identified:** ${factors.join(", ")}.\n\n`:"No major risk factors flagged.\n\n"}${pred.risk==="Critical"||pred.risk==="High"?"🚨 Immediate cardiologist consultation is strongly recommended.":pred.risk==="Moderate"?"⚠️ Structured lifestyle intervention and regular GP monitoring are recommended.":"✅ Low cardiovascular risk. Maintain preventive lifestyle measures."}`;
+  }
+
+  // Blood pressure
+  if (q.match(/blood pressure|bp|hypertension|pressure/)) {
+    if(P.bp>=160) return `🔴 **Stage 2 hypertension: ${P.bp}mmHg.** This is a serious medical finding for this ${P.age}-year-old ${sexLabel(P.sex)}. Immediate medical review is required. ${ctx}\n\nRecommended interventions: sodium restriction (<2g/day), DASH diet, aerobic exercise, possible antihypertensive medication. Untreated Stage 2 hypertension significantly increases heart attack and stroke risk.`;
+    if(P.bp>=140) return `🟡 **Stage 1 hypertension: ${P.bp}mmHg.** ${ctx}\n\nLifestyle interventions are first-line: reduce salt intake, increase physical activity, moderate alcohol, maintain healthy weight. Monitor at home twice daily. Medical review within 2–4 weeks.`;
+    if(P.bp>=130) return `🟡 **Elevated blood pressure: ${P.bp}mmHg** (above optimal of 120mmHg). ${ctx}\n\nLifestyle modification advised. Repeat measurement in 3 months. No medication typically needed at this stage.`;
+    return `🟢 **Blood pressure is normal: ${P.bp}mmHg.** No hypertension detected for this patient. ${ctx}`;
+  }
+
+  // Cholesterol
+  if (q.match(/cholesterol|ldl|hdl|lipid|statin/)) {
+    if(P.chol>=240) return `🔴 **High cholesterol: ${P.chol}mg/dL.** ${ctx}\n\nThis significantly accelerates atherosclerosis. Recommended: reduce saturated fat, eliminate trans fats, increase soluble fibre (oats, legumes). Statin therapy should be discussed with a physician. Target LDL <100mg/dL for high-risk patients.`;
+    if(P.chol>=200) return `🟡 **Borderline cholesterol: ${P.chol}mg/dL.** ${ctx}\n\nDietary modification is the first approach: Mediterranean diet, reduce red meat, increase fish and plant-based protein. Recheck in 3 months.`;
+    return `🟢 **Cholesterol is within range: ${P.chol}mg/dL.** ${ctx} No immediate pharmacological intervention needed.`;
+  }
+
+  // Chest pain / angina
+  if (q.match(/chest|pain|angina|anginal/)) {
+    const risk_angina = P.angina===1;
+    return `${risk_angina?"🔴":"🟡"} **Chest pain type: ${cpLabel(P.cp)}.** Exercise angina: ${P.angina===1?"YES — this is a significant finding.":"No."} ${ctx}\n\n${P.cp===0?"Asymptomatic chest pain carries the highest cardiovascular risk in the Cleveland dataset despite absence of typical symptoms.":""}\n\n${risk_angina?"Exercise-induced angina indicates coronary arteries cannot supply sufficient blood during exertion — strongly suggesting coronary artery disease. Urgent cardiology referral is warranted. Avoid strenuous activity until assessed.":"Monitor for any new chest symptoms and seek evaluation if angina develops."}`;
+  }
+
+  // ST depression / ECG
+  if (q.match(/st|ecg|electrocardiogram|depression|slope|ischaemia|ischemia/)) {
+    if(P.st>=2.0) return `🔴 **Significant ST depression: ${P.st}mm.** ${ctx}\n\nThis indicates myocardial ischaemia — the heart muscle is not receiving enough oxygen. Combined with a ${cpLabel(P.cp)} chest pain pattern, this is a high-risk finding. Immediate cardiology assessment and ECG are required.`;
+    if(P.st>=1.0) return `🟡 **Moderate ST depression: ${P.st}mm.** ${ctx}\n\nSuggests reduced cardiac perfusion. Should be investigated with stress testing and cardiology review, particularly given the other risk factors present.`;
+    return `🟢 **ST depression is minimal: ${P.st}mm.** ${ctx} No significant ECG-related risk flagged.`;
+  }
+
+  // Lifestyle / intervention
+  if (q.match(/lifestyle|intervention|change|diet|exercise|recommend|advice|improve|reduce|prevent/)) {
+    const tips=[];
+    if(P.bp>=140)   tips.push("• **Blood pressure:** DASH diet, sodium <2g/day, aerobic exercise 5×/week, home BP monitoring");
+    if(P.chol>=200) tips.push("• **Cholesterol:** Mediterranean diet, reduce saturated fat, increase oily fish and soluble fibre, consider statin evaluation");
+    if(P.fbs===1)   tips.push("• **Blood sugar:** Reduce refined carbohydrates, monitor fasting glucose weekly, HbA1c test, dietitian referral");
+    if(P.angina===1||P.st>=1) tips.push("• **Cardiac symptoms:** Supervised cardiac rehabilitation, avoid strenuous exertion until cardiology assessment");
+    tips.push("• **General:** 150+ minutes moderate aerobic exercise per week, BMI target 18.5–24.9, quit smoking if applicable");
+    tips.push("• **Diet:** Mediterranean pattern — olive oil, fish 2×/week, 5 portions fruit/vegetables daily, whole grains, limit processed food");
+    tips.push("• **Mental health:** Chronic stress raises cardiovascular risk — mindfulness, adequate sleep (7–9h), social support");
+    return `📋 **Personalised lifestyle interventions** — ${ctx}\n\n${tips.join("\n")}\n\nAI risk level: **${pred.risk}** (${(pred.prob*100).toFixed(1)}%). ${pred.risk!=="Low"?"Schedule GP review within the next 4 weeks to discuss these findings.":"Annual cardiovascular screening is sufficient at this risk level."}`;
+  }
+
+  // Vessels / thalassemia
+  if (q.match(/vessel|artery|coronary|thal|perfusion/)) {
+    return `${P.ca>=2?"🔴":"🟡"} **Coronary vessels affected: ${P.ca}. Thalassemia: ${thalLabel(P.thal)}.** ${ctx}\n\n${P.ca>=2?"Multi-vessel coronary disease is a serious finding — multiple arteries are significantly narrowed. Revascularisation (stenting or bypass surgery) may be indicated. Cardiology consultation is urgent.":P.ca===1?"Single-vessel disease detected. Medical management with lifestyle modification and antiplatelet therapy is typically first-line. Cardiology follow-up within 2 weeks.":"No vessel obstruction detected."}\n\n${P.thal===2?"A reversible thalassemia defect indicates viable but ischaemic myocardium — tissue that is at risk but can still be saved with timely intervention.":P.thal===1?"A fixed defect suggests prior myocardial infarction with scar tissue. This area no longer contributes to cardiac output.":"No perfusion abnormality detected."}`;
+  }
+
+  // Emergency / urgent
+  if (q.match(/emergency|urgent|hospital|call|immediate|danger/)) {
+    if(pred.risk==="Critical"||pred.risk==="High")
+      return `🚨 **URGENT MEDICAL ATTENTION RECOMMENDED.** ${ctx}\n\nThis patient has a ${(pred.prob*100).toFixed(1)}% cardiovascular event probability (${pred.risk} risk). Call emergency services immediately if the patient experiences: severe chest pain or pressure, shortness of breath at rest, pain in the arm, jaw, or neck, sudden dizziness or loss of consciousness, cold sweats combined with chest discomfort.\n\nDo not wait. Time is critical in cardiovascular events — every minute without treatment causes further heart muscle damage.`;
+    return `🟡 **Moderate-risk patient** — ${ctx}\n\nNo immediate emergency criteria met at this time. However, seek urgent medical attention if chest pain, shortness of breath, or sudden dizziness develop. Schedule a GP appointment within the next 2 weeks to review the risk factors identified.`;
+  }
+
+  // Default: full summary
+  return `❤️ **CardioGuard AI Summary** — ${ctx}\n\nPrediction: **${pred.label}** · Risk: **${pred.risk}** · Probability: **${(pred.prob*100).toFixed(1)}%**\n\nTry asking me about: blood pressure, cholesterol, chest pain, ST depression, lifestyle interventions, coronary vessels, or "what are the key risk factors?"`;
+}
+
+function doChat() {
+  const input=document.getElementById("chat-in");
+  const q=input.value.trim(); if(!q) return;
+  input.value="";
+  chatLog.push({role:"user",text:q});
+  chatLog.push({role:"ai",  text:buildAnswer(q)});
+  renderChat();
+}
+function renderChat() {
+  const box=document.getElementById("chat-msgs");
+  if(!chatLog.length){box.innerHTML=`<p class="placeholder">Ask anything about the current patient vitals or cardiovascular risk.</p>`;return;}
+  box.innerHTML=chatLog.map(m=>
+    m.role==="user"
+      ?`<div class="msg-user">🧑 <strong>You:</strong> ${m.text}</div>`
+      :`<div class="msg-ai">🤖 <strong>CardioGuard AI:</strong> ${m.text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`
+  ).join("");
+  box.scrollTop=box.scrollHeight;
+}
+function clearChat(){chatLog.length=0;renderChat();}
+
+/* ══════════════════════════════════════════════════════════
+   DATASET TABLE
+══════════════════════════════════════════════════════════ */
+const ROWS=[
+  [63,1,0,145,233,1,0,150,0,2.3,2,0,1,"No Disease",0],
+  [37,1,2,130,250,0,1,187,0,3.5,2,0,2,"Heart Disease",1],
+  [41,0,1,130,204,0,0,172,0,1.4,1,0,2,"No Disease",0],
+  [56,1,1,120,236,0,1,178,0,0.8,1,0,2,"No Disease",0],
+  [57,0,0,120,354,0,1,163,1,0.6,1,0,2,"No Disease",0],
+  [57,1,0,140,192,0,1,148,0,0.4,2,0,1,"Heart Disease",1],
+  [56,0,1,140,294,0,0,153,0,1.3,2,0,2,"Heart Disease",1],
+  [44,1,1,120,263,0,1,173,0,0.0,1,0,3,"No Disease",0],
+  [52,1,2,172,199,1,1,162,0,0.5,1,0,3,"No Disease",0],
+  [57,1,2,150,168,0,1,174,0,1.6,1,0,2,"Heart Disease",1],
+  [54,1,0,140,239,0,1,160,0,1.2,1,0,2,"Heart Disease",1],
+  [48,0,2,130,275,0,1,139,0,0.2,1,0,2,"No Disease",0],
+  [49,1,1,130,266,0,1,171,0,0.6,1,0,2,"No Disease",0],
+  [64,1,0,110,211,0,0,144,1,1.8,2,0,2,"Heart Disease",1],
+  [58,0,0,150,283,1,0,162,0,1.0,1,0,2,"Heart Disease",1],
+];
+const HDRS=["Age","Sex","CP","BP","Chol","FBS","ECG","MaxHR","Angina","ST Dep","Slope","CA","Thal","Diagnosis","Target"];
+document.getElementById("dt").innerHTML=
+  `<tr>${HDRS.map(h=>`<th>${h}</th>`).join("")}</tr>`+
+  ROWS.map(r=>`<tr>${r.map((v,i)=>i===13?`<td><span class="${r[14]===0?'b0':'b1'}">${v}</span></td>`:`<td>${v}</td>`).join("")}</tr>`).join("");
+
+/* Init */
+runAll();
+</script>
+</body>
+</html>

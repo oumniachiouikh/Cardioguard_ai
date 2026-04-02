@@ -110,6 +110,9 @@ Cynthia Ayetolou
 - Construction and structuring of the medical knowledge base
 - Contribution to testing and system validation
 
+## Disclaimer
+This project is intended for educational and research purposes only. It is not a medical diagnosis tool.
+
 ## Authors
 
 Oumnia Chiouikh

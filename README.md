@@ -1,17 +1,37 @@
 # ❤️ CardioGuard AI
 
-A multi-agent AI system for cardiovascular event risk prediction and personalised lifestyle intervention.
+# CardioGuard AI
 
-**Predictive AI** — XGBoost classifier trained on Cleveland Heart Disease features  
-**Generative AI** — Mistral LLM for personalised medically-backed lifestyle advice  
-**RAG** — FAISS vector index + Mistral answering cardiology questions from a medical knowledge base  
-**Architecture** — LangChain orchestrator coordinating 6 specialised agents
+A multi-agent artificial intelligence system for cardiovascular risk prediction and personalised lifestyle intervention.
 
 ---
 
-## Architecture
+## Overview
 
-```
+CardioGuard AI is designed to support early detection of cardiovascular disease (CVD) and provide actionable, personalised recommendations.
+
+The system combines:
+
+- A predictive machine learning model (XGBoost) for estimating cardiovascular risk
+- A Retrieval-Augmented Generation (RAG) pipeline for medical question answering
+- A large language model (Mistral) for generating personalised lifestyle advice
+- A multi-agent architecture orchestrated using LangChain
+
+---
+
+## Key Features
+
+- Cardiovascular risk prediction using XGBoost
+- Model explainability using SHAP
+- Clinical alert generation based on medical thresholds
+- Retrieval-augmented medical question answering (FAISS + Mistral)
+- Personalised lifestyle recommendations
+- Patient clustering using KMeans
+
+---
+
+## System Architecture
+
 Streamlit Dashboard (app.py)
           │
           ▼
@@ -25,47 +45,37 @@ Data    XGB     RAG      Mistral    Alerts   SHAP+KMeans
          ▼       ▼          ▼          ▼          ▼
   cardio_data  FAISS     Mistral   Clinical   XGBoost
      .csv      Index      LLM     Thresholds   Model
-```
 
-## Agents
-
-| Agent | Role | Tech |
-|-------|------|------|
-| Agent 1 — DataAgent     | Load, clean, preprocess patient data | pandas, StandardScaler |
-| Agent 2 — PredictAgent  | Predict cardiovascular event risk     | XGBoost, AUC ~0.88 |
-| Agent 3 — RAGAgent      | Answer medical questions              | FAISS, sentence-transformers, Mistral |
-| Agent 4 — ExplainAgent  | Personalised lifestyle interventions  | Mistral-7B-Instruct |
-| Agent 5 — AlertAgent    | Clinical threshold-based alerts       | Rule-based clinical guidelines |
-| Agent 6 — SHAPAgent     | Feature importance + patient cluster  | SHAP TreeExplainer, KMeans k=3 |
+---
 
 ## Dataset
 
-Based on the **Cleveland Heart Disease Dataset** (UCI):
+Based on the Cleveland Heart Disease Dataset (UCI Repository):
+
 - 900 synthetic patient records
-- 13 clinical features: age, sex, chest pain type, resting BP, cholesterol, fasting blood sugar, ECG, max heart rate, exercise angina, ST depression, ST slope, number of vessels, thalassemia
-- Binary target: 0 = No Heart Disease, 1 = Heart Disease
+- 13 clinical features
+- Binary classification target (heart disease)
+
+---
+
+## Model Performance
+
+- Accuracy: ~84%
+- AUC-ROC: ~0.88
+- Recall: ~86%
 
 ---
 
 ## Quickstart
 
 ```bash
-# 1. Install dependencies
 pip install -r requirements.txt
-
-# 2. Generate dataset and train model
 python data/generate_data.py
-
-# 3. Launch the dashboard
 streamlit run app.py
-# Open http://localhost:8501
 ```
 
----
+## Project Structure
 
-## Project structure
-
-```
 cardioguard/
 ├── app.py
 ├── requirements.txt
@@ -86,7 +96,38 @@ cardioguard/
     ├── cardio_xgb.pkl
     ├── scaler.pkl
     └── faiss_cardio/
-```
+
+## Tech Stack
+Python
+XGBoost
+SHAP
+LangChain
+FAISS
+Mistral LLM
+Streamlit
+
+## Contributions
+Oumnia Chiouikh
+  Design and implementation of the multi-agent architecture (LangChain orchestrator)
+  Development of the XGBoost predictive model
+  Integration of SHAP explainability and patient clustering
+  Implementation of the Streamlit dashboard
+  System integration and end-to-end pipeline
+Cynthia Ayetolou
+  Development of the RAG pipeline (FAISS + embeddings)
+  Integration of the Mistral LLM for medical question answering
+  Implementation of personalised lifestyle recommendation generation
+  Construction and structuring of the medical knowledge base
+  Contribution to testing and system validation
+
+## Authors
+
+Oumnia Chiouikh
+Cynthia Ayetolou
+
+M1 IoT — Université Marie et Louis Pasteur
+2025–2026
+
 
 ---
 

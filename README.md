@@ -44,7 +44,7 @@ Data    XGB     RAG       Mistral     Alerts   SHAP+KMeans
   cardio_data  FAISS      Mistral    Clinical   XGBoost
      .csv      Index       LLM      Thresholds   Model
 
----
+```
 
 ## Dataset
 
@@ -84,6 +84,7 @@ cardioguard/
     ├── cardio_xgb.pkl
     ├── scaler.pkl
     └── faiss_cardio/
+```
 
 ## Tech Stack
 - Python

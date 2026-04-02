@@ -78,10 +78,24 @@ streamlit run app.py
 
 cardioguard/
 ├── app.py
+├── requirements.txt
+├── README.md
+├── cardioguard_demo.html     ← standalone browser demo
 ├── agents/
+│   ├── orchestrator.py
+│   ├── data_agent.py
+│   ├── predict_agent.py
+│   ├── rag_agent.py
+│   ├── explain_agent.py
+│   ├── alert_agent.py
+│   └── shap_agent.py
 ├── data/
-├── models/
-└── README.md
+│   ├── generate_data.py
+│   └── cardio_data.csv
+└── models/
+    ├── cardio_xgb.pkl
+    ├── scaler.pkl
+    └── faiss_cardio/
 
 ## Tech Stack
 Python

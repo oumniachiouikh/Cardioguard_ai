@@ -29,7 +29,7 @@ The system combines:
 ---
 
 ## System Architecture
-
+```text
 Streamlit Dashboard (app.py)
           │
           ▼
@@ -73,7 +73,7 @@ streamlit run app.py
 ```
 
 ## Project Structure
-
+```text
 cardioguard/
 ├── app.py
 ├── agents/

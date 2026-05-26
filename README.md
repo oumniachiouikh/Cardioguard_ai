@@ -98,6 +98,6 @@ cardioguard/
 ## Disclaimer
 This project is intended for educational and research purposes only. It is not a medical diagnosis tool.
 
-M1 IoT — Université Marie et Louis Pasteur
+M1 IoT — Université Marie et Louis Pasteur " EIPHI GRADUATE SCHOOL"
 2025–2026
 
